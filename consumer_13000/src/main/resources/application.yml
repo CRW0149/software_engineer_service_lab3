@@ -1,0 +1,93 @@
+spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  application:
+    name: "consumer"
+server:
+  port: 13000
+eureka:
+  instance:
+    #    显示ip地址而不是机器名
+    prefer-ip-address: true
+    instance-id: "${spring.cloud.client.ip-address}:${server.port}"
+    #    15秒没有通信，那就被从服务中心注销
+    lease-expiration-duration-in-seconds: 15
+    #    每5秒通信一次，心跳
+    lease-renewal-interval-in-seconds: 5
+  client:
+    #    微服务注册中心的地址
+    service-url:
+      defaultZone: "http://eureka15000:15000/eureka/,http://eureka16000:16000/eureka/"
+
+
+#熔断器配置
+#resilience4j:
+#  circuitbreaker:
+##    默认配置
+#    configs:
+#      default:
+##        自动从打开到半开
+#        automatic-transition-from-open-to-half-open-enabled: true
+##        熔断时记录异常
+#        record-exceptions: java.lang.Exception
+##        健康检测机制
+#        register-health-indicator: false
+#
+#        #   配置滑动窗口类型为时间窗口型；
+#        sliding-window-type: TIME_BASED
+#
+#        #	配置滑动窗口长度为10秒
+#        sliding-window-size: 10
+#
+#        #   配置滑动窗口内最小请求个数为5
+#        minimum-number-of-calls: 5
+#
+#        #配置断路器能自动从OPEN状态变为HALF_OPEN状态，默认等待时间为5秒
+#        wait-duration-in-open-state: 5s
+#
+#        #配置断路器HALF_OPEN状态时允许测试响应能力的请求数为3
+#        permitted-number-of-calls-in-half-open-state: 3
+#
+#    instances:
+#      circuitBreakerA:
+#        base-config: default
+#        #	配置断路器OPEN状态的失败率阈值为30%；
+#        failure-rate-threshold: 30
+#      circuitBreakerB:
+#        base-config: default
+#        #	配置断路器OPEN状态的失败率阈值为50%；
+#        failure-rate-threshold: 50
+#        #  	配置断路器OPEN状态的慢调用阈值为30%；
+#        slow-call-rate-threshold: 30
+#        #   配置断路器判断是否为慢调用的时间阈值为2秒；
+#        slow-call-duration-threshold: 2s
+
+#resilience4j:
+#  #信号量隔离
+#  bulkhead:
+#    configs:
+#      default:
+#        #最大并发量
+#        max-concurrent-calls: 10
+#        #配置允许现成阻塞的最大等待时间为20ms
+#        max-wait-duration: 20
+#    instances:
+#      bulkA:
+#        base-config: default
+
+resilience4j:
+  ratelimiter:
+    configs:
+      default:
+        #在2秒内放5个令牌进入，不论什么时候放,即2s内限制五个访问
+        limit-for-period: 5
+        #
+        limit-refresh-period: 2000
+        #         没有获得令牌等10ms
+        timeout-duration: 10
+    instances:
+      rate1:
+        base-config: default
+
+
